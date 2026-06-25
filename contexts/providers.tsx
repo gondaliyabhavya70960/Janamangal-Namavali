@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { useSettingsStore } from "@/store/settings";
 import { usePlayerStore } from "@/store/player";
+import { requestPersistentStorage } from "@/services/backup";
 
 /**
  * Bootstraps client-only side effects exactly once: hydrate settings from
@@ -23,6 +24,8 @@ function AppBootstrap({ children }: { children: ReactNode }) {
   useEffect(() => {
     void loadSettings();
     attach();
+    // Best-effort: keep the on-device library safe from automatic eviction.
+    void requestPersistentStorage();
   }, [loadSettings, attach]);
 
   // Apply persisted playback defaults + theme once settings are ready.

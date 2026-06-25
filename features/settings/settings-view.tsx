@@ -12,22 +12,33 @@ import {
   Moon,
   Palette,
   RotateCcw,
+  ShieldCheck,
   Sun,
   Target,
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { GoogleDriveCard } from "./google-drive-card";
 import { useSettingsStore } from "@/store/settings";
 import { usePlayerStore } from "@/store/player";
 import { ACCENT_PRESETS, APP_NAME } from "@/lib/constants";
-import { buildBackup, clearLibrary, estimateStorage, resetApp, restoreBackup } from "@/services/backup";
+import {
+  buildBackup,
+  clearLibrary,
+  estimateStorage,
+  isStoragePersisted,
+  requestPersistentStorage,
+  resetApp,
+  restoreBackup,
+} from "@/services/backup";
 import { requestNotificationPermission, sendNotification } from "@/lib/notifications";
 import { cn, downloadText, formatBytes } from "@/lib/utils";
 import type { BackupFile, ThemeMode } from "@/types";
@@ -63,16 +74,27 @@ export function SettingsView() {
   const update = useSettingsStore((s) => s.update);
   const reset = useSettingsStore((s) => s.reset);
   const configure = usePlayerStore((s) => s.configure);
+  const resetPlayer = usePlayerStore((s) => s.resetPlayer);
   const { setTheme } = useTheme();
   const importRef = useRef<HTMLInputElement>(null);
 
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
+  const [persisted, setPersisted] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
     void estimateStorage().then(setStorage);
+    void isStoragePersisted().then(setPersisted);
   }, []);
+
+  const makePersistent = async () => {
+    const ok = await requestPersistentStorage();
+    setPersisted(ok);
+    toast[ok ? "success" : "error"](
+      ok ? "Storage is now permanent on this device" : "Your browser declined permanent storage",
+    );
+  };
 
   const exportBackup = async () => {
     const toastId = toast.loading("Preparing backup…");
@@ -276,16 +298,35 @@ export function SettingsView() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {storage && (
-            <div className="rounded-xl bg-muted/50 p-3 text-sm">
+          <div className="space-y-2 rounded-xl bg-muted/50 p-3 text-sm">
+            {storage && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">On-device storage</span>
+                <span className="text-muted-foreground">On-device storage used</span>
                 <span className="tabular-nums">
                   {formatBytes(storage.usage)} {storage.quota > 0 && `/ ${formatBytes(storage.quota)}`}
                 </span>
               </div>
+            )}
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-muted-foreground">
+                Permanent storage{" "}
+                <span className="text-xs">(protects your library from auto-cleanup)</span>
+              </span>
+              {persisted ? (
+                <Badge variant="success" className="gap-1">
+                  <ShieldCheck className="size-3.5" /> On
+                </Badge>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={makePersistent}>
+                  Make permanent
+                </Button>
+              )}
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">
+              Everything is stored locally on this device — no account, no server. Export a backup
+              regularly so you can move your data or restore it.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={exportBackup}>
               <Download className="size-4" /> Export backup
@@ -318,8 +359,10 @@ export function SettingsView() {
         </CardContent>
       </Card>
 
+      <GoogleDriveCard />
+
       <p className="pb-4 text-center text-xs text-muted-foreground">
-        {APP_NAME} · runs fully offline · your data never leaves this device.
+        {APP_NAME} · runs fully offline · your data lives only on this device unless you back it up.
       </p>
 
       <ConfirmDialog
@@ -331,6 +374,7 @@ export function SettingsView() {
         destructive
         onConfirm={async () => {
           await clearLibrary();
+          resetPlayer();
           toast.success("Library cleared");
         }}
       />
@@ -343,6 +387,7 @@ export function SettingsView() {
         destructive
         onConfirm={async () => {
           await resetApp();
+          resetPlayer();
           await reset();
           toast.success("App reset to defaults");
         }}

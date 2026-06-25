@@ -85,6 +85,11 @@ export interface PlayerState {
   enqueueNext: (song: Song) => void;
   addToQueue: (song: Song) => void;
 
+  /** Reconcile the player when songs are deleted from the library. */
+  removeSongsFromPlayer: (ids: string[]) => void;
+  /** Stop and fully clear the player (library cleared / app reset). */
+  resetPlayer: () => void;
+
   _handleEvent: (event: AudioEngineEvent) => void;
   _tick: () => void;
 }
@@ -450,6 +455,67 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   addToQueue(song) {
     set((state) => ({ queue: [...state.queue, song] }));
+  },
+
+  removeSongsFromPlayer(ids) {
+    const idSet = new Set(ids);
+    const state = get();
+    const queue = state.queue.filter((s) => !idSet.has(s.id));
+    const shuffledQueue = state.shuffledQueue?.filter((s) => !idSet.has(s.id)) ?? null;
+    const current = state.currentSong;
+
+    if (current && idSet.has(current.id)) {
+      // The active track was deleted — stop playback and clear it.
+      const engine = getAudioEngine();
+      engine.pause();
+      engine.setLoop(null);
+      void tracker.endSong(Date.now());
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = null;
+      }
+      if ("mediaSession" in navigator) navigator.mediaSession.metadata = null;
+      set({
+        queue,
+        shuffledQueue,
+        currentSong: null,
+        currentIndex: -1,
+        loopRegion: null,
+        loopEnabled: false,
+        activeLoopPresetId: null,
+        playback: { ...state.playback, playing: false, ready: false, position: 0, duration: 0, buffered: 0 },
+      });
+      return;
+    }
+
+    // Otherwise just prune the queue and keep the index pointed at the current song.
+    const list = shuffledQueue ?? queue;
+    const nextIndex = current ? list.findIndex((s) => s.id === current.id) : state.currentIndex;
+    set({ queue, shuffledQueue, currentIndex: nextIndex });
+  },
+
+  resetPlayer() {
+    const engine = getAudioEngine();
+    engine.pause();
+    engine.setLoop(null);
+    void tracker.endSong(Date.now());
+    if (currentObjectUrl) {
+      URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
+    }
+    if ("mediaSession" in navigator) navigator.mediaSession.metadata = null;
+    const { volume, speed, preservePitch } = get().playback;
+    set({
+      queue: [],
+      shuffledQueue: null,
+      currentIndex: -1,
+      currentSong: null,
+      loopRegion: null,
+      loopEnabled: false,
+      activeLoopPresetId: null,
+      sessionId: null,
+      playback: { ...initialPlayback, volume, speed, preservePitch },
+    });
   },
 
   _handleEvent(event) {

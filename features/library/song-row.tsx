@@ -53,6 +53,7 @@ export function SongRow({
   const playSong = usePlayerStore((s) => s.playSong);
   const enqueueNext = usePlayerStore((s) => s.enqueueNext);
   const addToQueue = usePlayerStore((s) => s.addToQueue);
+  const removeFromPlayer = usePlayerStore((s) => s.removeSongsFromPlayer);
   const currentId = usePlayerStore((s) => s.currentSong?.id);
   const playing = usePlayerStore((s) => s.playback.playing);
 
@@ -70,6 +71,7 @@ export function SongRow({
   const handleDelete = async () => {
     const snapshot = await snapshotSong(song.id);
     await deleteSong(song.id);
+    removeFromPlayer([song.id]);
     toast("Track deleted", {
       description: song.title,
       action: snapshot

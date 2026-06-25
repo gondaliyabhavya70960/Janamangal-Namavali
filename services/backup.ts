@@ -128,3 +128,20 @@ export async function estimateStorage(): Promise<{ usage: number; quota: number 
   }
   return null;
 }
+
+/** Whether the browser has marked our on-device storage as persistent (won't auto-evict). */
+export async function isStoragePersisted(): Promise<boolean> {
+  if (typeof navigator === "undefined" || !navigator.storage?.persisted) return false;
+  return navigator.storage.persisted();
+}
+
+/**
+ * Ask the browser to make storage persistent so the music library is never
+ * evicted under storage pressure. Auto-granted for installed PWAs / engaged
+ * sites; may prompt elsewhere. Safe to call repeatedly.
+ */
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (typeof navigator === "undefined" || !navigator.storage?.persist) return false;
+  if (await navigator.storage.persisted()) return true;
+  return navigator.storage.persist();
+}
