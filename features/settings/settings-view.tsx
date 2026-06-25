@@ -26,7 +26,6 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { GoogleDriveCard } from "./google-drive-card";
 import { useSettingsStore } from "@/store/settings";
 import { usePlayerStore } from "@/store/player";
 import { ACCENT_PRESETS, APP_NAME } from "@/lib/constants";
@@ -359,10 +358,9 @@ export function SettingsView() {
         </CardContent>
       </Card>
 
-      <GoogleDriveCard />
-
       <p className="pb-4 text-center text-xs text-muted-foreground">
-        {APP_NAME} · runs fully offline · your data lives only on this device unless you back it up.
+        {APP_NAME} · runs fully offline · your data lives only on this device. Export a backup to keep
+        a copy or move it elsewhere.
       </p>
 
       <ConfirmDialog

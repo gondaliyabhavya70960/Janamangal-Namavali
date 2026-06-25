@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { useSettingsStore } from "@/store/settings";
 import { usePlayerStore } from "@/store/player";
 import { requestPersistentStorage } from "@/services/backup";
+import { seedDemoSongIfNeeded } from "@/services/seed";
 
 /**
  * Bootstraps client-only side effects exactly once: hydrate settings from
@@ -26,6 +27,8 @@ function AppBootstrap({ children }: { children: ReactNode }) {
     attach();
     // Best-effort: keep the on-device library safe from automatic eviction.
     void requestPersistentStorage();
+    // Seed a bundled demo track on first run so there's data to play with.
+    void seedDemoSongIfNeeded();
   }, [loadSettings, attach]);
 
   // Apply persisted playback defaults + theme once settings are ready.
