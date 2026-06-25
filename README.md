@@ -215,13 +215,11 @@ maskable icons), shows an in‑app **Install** button via `beforeinstallprompt`,
 
 ---
 
-## ☁️ Storage, backup & Google Drive
+## 💾 Storage & backup
 
-- **On-device, no account.** Songs (as Blobs) and all data live in IndexedDB on the device — there is no server. On first launch the app requests **persistent storage** (`navigator.storage.persist()`) so the browser won't evict your library under storage pressure; Settings shows whether it's permanent and lets you request it manually.
-- **Local backup.** Settings → Data exports a full JSON backup (including audio) and restores it.
-- **Google Drive backup (optional).** Settings → Google Drive offers two modes:
-  - **Save / Share to Drive (no setup):** exports the backup and opens your device's share sheet so you drop it into the Google Drive app (desktop falls back to a download).
-  - **One-tap sign-in backup & restore:** set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (see [`.env.example`](./.env.example)) to enable Google sign-in that backs up/restores to a “Riyaz Backups” folder in your Drive. Fully client-side via Google Identity Services with the non-sensitive `drive.file` scope — no backend, no app verification.
+- **On-device, no account, no server.** Songs (as Blobs) and all data live in IndexedDB on the device. On first launch the app requests **persistent storage** (`navigator.storage.persist()`) so the browser won't evict your library under storage pressure; Settings shows whether it's permanent and lets you request it manually.
+- **Demo track.** A bundled demo song (`public/demo/`) is seeded into the library on first run so there's something to play and test immediately. It's stored in IndexedDB like any other track — favorite it, loop it, or delete it.
+- **Local backup.** Settings → Data exports a full JSON backup (including audio) and restores it — your portable, on-device way to keep a copy or move data between devices.
 
 ## 🔊 Audio engine architecture
 
