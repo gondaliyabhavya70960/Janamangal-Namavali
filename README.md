@@ -8,7 +8,7 @@ pitch‑preserving speed control, a waveform editor and beautiful analytics.
 
 _Riyaz_ (रियाज़) is the Hindustani word for disciplined, repeated music practice.
 
-`Next.js 15` · `React 19` · `TypeScript` · `Tailwind v4` · `Dexie/IndexedDB` · `WaveSurfer.js` · `Serwist PWA`
+`Next.js 16` · `React 19` · `TypeScript` · `Tailwind v4` · `Dexie/IndexedDB` · `WaveSurfer.js` · `Serwist PWA`
 
 </div>
 
@@ -262,7 +262,7 @@ Command Palette · Backup/Restore · Notifications.
 
 ## 🚀 Getting started
 
-**Prerequisites:** Node ≥ 18.18 and [pnpm](https://pnpm.io) (`corepack enable`).
+**Prerequisites:** Node ≥ 20.9 (required by Next.js 16) and [pnpm](https://pnpm.io) (`corepack enable`).
 
 ```bash
 pnpm install        # install dependencies
@@ -290,6 +290,10 @@ pnpm build          # production build (also bundles the Serwist service worker)
 pnpm start          # serve the production build → http://localhost:3000
 ```
 
+> The `build`/`dev` scripts pass `--webpack` because Serwist injects its precache manifest via a
+> webpack plugin; Next.js 16 defaults to Turbopack, so the flag keeps the service-worker integration
+> working. Linting uses the ESLint 9 flat config (`eslint.config.mjs`) that Next.js 16 requires.
+
 The build emits static pages for every route plus `public/sw.js`. A browser smoke test that loads
 every route and asserts zero console errors is available:
 
@@ -301,7 +305,7 @@ pnpm test:smoke     # requires playwright-core + a Chromium binary
 
 ## 🌐 Deployment guide
 
-Riyaz is a standard Next.js 15 app and deploys anywhere Next runs. **HTTPS is required** for service
+Riyaz is a standard Next.js 16 app and deploys anywhere Next runs. **HTTPS is required** for service
 workers (all hosts below provide it).
 
 **Vercel (recommended)**

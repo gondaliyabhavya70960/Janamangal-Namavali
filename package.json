@@ -5,10 +5,10 @@
   "description": "Riyaz — a premium, offline-first music practice timer PWA for musicians, dancers, and singers.",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -42,7 +42,7 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.468.0",
-    "next": "15.1.3",
+    "next": "16.2.9",
     "next-themes": "^0.4.4",
     "react": "19.0.0",
     "react-chartjs-2": "^5.2.0",
@@ -62,8 +62,8 @@
     "@types/react-dom": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "15.1.3",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "16.2.9",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^9.1.7",
     "playwright-core": "^1.61.1",
@@ -76,6 +76,6 @@
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20.9.0"
   }
 }
