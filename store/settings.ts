@@ -28,7 +28,7 @@ export function applyReduceMotion(reduce: boolean) {
   document.documentElement.classList.toggle("reduce-motion", reduce);
 }
 
-export const useSettingsStore = create<SettingsState>((set, get) => ({
+export const useSettingsStore = create<SettingsState>((set) => ({
   settings: DEFAULT_SETTINGS,
   loaded: false,
 
