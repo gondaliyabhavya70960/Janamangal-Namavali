@@ -16,6 +16,7 @@ export function SelectionBar({ songs }: { songs: Song[] }) {
   const selectedIds = useUIStore((s) => s.selectedSongIds);
   const clearSelection = useUIStore((s) => s.clearSelection);
   const loadQueue = usePlayerStore((s) => s.loadQueue);
+  const removeFromPlayer = usePlayerStore((s) => s.removeSongsFromPlayer);
   const [playlistOpen, setPlaylistOpen] = useState(false);
 
   const selected = songs.filter((s) => selectedIds.includes(s.id));
@@ -32,6 +33,7 @@ export function SelectionBar({ songs }: { songs: Song[] }) {
   const deleteAll = async () => {
     const snapshots = await Promise.all(selected.map((s) => snapshotSong(s.id)));
     await Promise.all(selected.map((s) => deleteSong(s.id)));
+    removeFromPlayer(selected.map((s) => s.id));
     clearSelection();
     toast(`Deleted ${pluralize(selected.length, "track")}`, {
       action: {
